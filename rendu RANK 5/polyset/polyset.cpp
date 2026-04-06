@@ -1,0 +1,5 @@
+#include "array_bag.cpp"
+#include "tree_bag.cpp"
+#include "searchable_array_bag.cpp"
+#include "searchable_tree_bg.cpp"
+#include "set.cpp"
