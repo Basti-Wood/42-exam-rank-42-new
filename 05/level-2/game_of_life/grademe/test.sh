@@ -208,7 +208,7 @@ run_test "Invalid cmds ignored (z,1)" "dxzs1s" 3 3 0 "$TMP/expected"
 # ========== TEST 13: Pen toggle off and on ==========
 # 'xddxddxdd' on 7x1: x[mark(0,0)]→d(0,1)→d(0,2)→x[UP]→d(0,3)→d(0,4)→x[mark(0,4)]→d(0,5)→d(0,6)
 cat > "$TMP/expected" << 'EOF'
-000  00
+000 000
 EOF
 run_test "Pen toggle off/on 7x1 iter=0" "xddxddxdd" 7 1 0 "$TMP/expected"
 
@@ -229,7 +229,7 @@ cat > "$TMP/expected" << 'EOF'
       
  00   
   0   
-  0   
+  00  
       
       
 EOF

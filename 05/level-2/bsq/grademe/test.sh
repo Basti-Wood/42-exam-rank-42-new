@@ -226,9 +226,9 @@ $$$$$
 $$$$$
 EOF
 cat > "$TMP/expected" << 'EOF'
-#####
-#####
-#####
+###$$
+###$$
+###$$
 EOF
 run_valid_test "Custom characters (full 3x3)" "$TMP/map" "$TMP/expected"
 
@@ -318,8 +318,8 @@ cat > "$TMP/expected" << 'EOF'
 .oxxx
 .oxxx
 .oxxx
-..xxx
-..xxx
+.....
+.....
 EOF
 run_valid_test "Obstacle column (3x3 right side)" "$TMP/map" "$TMP/expected"
 
