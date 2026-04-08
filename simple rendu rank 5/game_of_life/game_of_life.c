@@ -3,23 +3,24 @@
 #include <stdio.h>
 #include <stdbool.h>
 
-char **make_map(int height, int width)
+bool **make_map(int height, int width)
 {
-    char **map = calloc(height, sizeof(char*));
-    if (!map)
+    bool** map = calloc(height, sizeof(bool**));
+    if(!map)
     {
-        perror("calloc failed for map");
+        free(map);
         return NULL;
     }
-
-    for (int i = 0; i < height; i++)
+    for(int i = 0; i < height; i++)
     {
-        map[i] = calloc(width, sizeof(char));
-        if (!map[i])
+        map[i] = calloc(width, sizeof(bool*));
+        if(!map[i])
         {
-            perror("calloc failed for map row");
-            for (int j = 0; j < i; j++)
-                free(map[j]);
+            while(i > 0)
+            {
+                free(map[i]);
+                i--;
+            }
             free(map);
             return NULL;
         }
@@ -27,141 +28,104 @@ char **make_map(int height, int width)
     return map;
 }
 
-void	read_input(char **board, int width, int height)
+void free_map(bool **map, int height)
 {
-	int		row;
-	int		col;
-	bool	pen;
-	char	c;
-
-	row = 0;
-	col = 0;
-	pen = false;
-	while (read(0, &c, 1) == 1)
-	{
-		if (c == 'x')
-			pen = !pen;
-		else if (c == 'w' && row > 0)
-			row--;
-		else if (c == 's' && row < height - 1)
-			row++;
-		else if (c == 'a' && col > 0)
-			col--;
-		else if (c == 'd' && col < width - 1)
-			col++;
-		else
-			continue;
-		if (pen)
-			board[row][col] = 1;
-	}
+    for(int i = 0; i < height; i++)
+    {
+        free(map[i]);
+    }
+    free(map);
 }
 
-void	free_board(char **board, int height)
+void read_input(bool **map, int height, int width)
 {
-	int	i;
-
-	i = 0;
-	while (i < height)
-		free(board[i++]);
-	free(board);
+    char c = 0;
+    bool pen = false;
+    int row = 0;
+    int col = 0;
+    while(read(0, &c, 1) == 1)
+    {
+        if(c == 'x')
+            pen = !pen;
+        else if(c == 'w' && row > 0)
+           row--;
+        else if(c == 'a' && col > 0)
+            col--;
+        else if(c == 's' && row < height)
+            row++;
+        else if(c == 'd' && col < width)
+            col++;
+        else
+            continue;
+        if(pen)
+            map[row][col] = 1;
+        
+    }
 }
 
-int count_neighbors(char **map, int wdth, int height, int row, int col)
+int count_neighbors(bool **map, int height, int width, int row, int col)
 {
     int count = 0;
-    int r = row - 1;
-    int c;
-    while (r <= row + 1)
+    for(int r = row-1; r <= row+1; r++)
     {
-        c = col - 1;
-        while (c <= col + 1)
+        for(int c = col-1; c <= col+1; c++)
         {
-            if ((r != row || c != col) && r >= 0 && r < height && c >= 0 && c < wdth)
+            if((r != row || c != col) && r >= 0 && c >= 0 && r < height && c < width)
                 count += map[r][c];
-            c++;
         }
-        r++;
     }
     return count;
 }
 
-char **next_gen(char **map, int width, int height)
+bool **next_gen(bool **map, int height, int width)
 {
-    char **next = make_map(height, width);
-    int row = 0;
-    int col = 0;
-    int n;
-
-    if (!next)
-		return (NULL);
-    while(row < height)
+    int count = 0;
+    bool **next = make_map(height, width);
+    for(int row = 0; row < height; row++)
     {
-        col = 0;
-        while (col < width)
+        for(int col = 0; col < width; col++)
         {
-            n = count_neighbors(map, width, height, row, col);
-            if (map[row][col])
-            {
-                if(n==2 || n == 3)
-                    next[row][col] = 1;
-            }
-            else
-            {
-                if(n == 3)
-                    next[row][col] = 1;
-            }
-            ++col;
+            count = count_neighbors(map, height, width, row, col);
+            if((map[row][col] && count == 2) || count == 3)
+                next[row][col] = 1;
         }
-        ++row;
     }
     return next;
 }
 
-void print_map(char **map, int height, int width)
+void print_map(bool** map, int height, int width)
 {
-    int row = 0;
-    int col = 0;
-
-    while(row < height)
+    for(int row = 0; row < height; row++)
     {
-        col = 0;
-        while(col < width)
+        for(int col = 0; col < width; col++)
         {
             if(map[row][col])
                 putchar('0');
             else
                 putchar(' ');
-            col++;
         }
         putchar('\n');
-        row++;
     }
 }
 
-int main(int argv, char **argc)
+int main(int i, char **c)
 {
-    if(argv != 4)
-    {
-        printf("ERROR %s Width height iterations\n", argc[0]);
-        return 1;
-    }
-    int height = atoi(argc[2]);
-    int width = atoi(argc[1]);
-    int iter = atoi(argc[3]);
-    char **map = make_map(height, width);
-    char **next;
-    read_input(map, width, height);
+    if(i != 4)
+        return 0;
+    int width = atoi(c[1]);
+    int height = atoi(c[2]);
+    int iter = atoi(c[3]);
+    bool** map = make_map(height, width);
+    bool** next;
+    read_input(map, height, width);
     while(iter > 0)
     {
-		next = next_gen(map, width, height);
-		if (!next)
-			break ;
-		free_board(map, height);
-		map = next;
-		iter--;
+        next = next_gen(map, height, width);
+        free_map(map, height);
+        map = next;
+        iter--;
     }
     print_map(map, height, width);
-    free_board(map, height);
-
+    free_map(map, height);
     return 0;
 }
